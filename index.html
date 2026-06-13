@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>USMNT — World Cup 2026</title>
+<style>
+  :root{
+    --bg:#0b1020;--card:#121a32;--ink:#eef1ff;--mute:#94a3b8;
+    --red:#bf0a30;--white:#fff;--blue:#002868;--accent:#3b82f6;
+    --win:#16a34a;--loss:#ef4444;--draw:#a3a3a3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--ink);background:linear-gradient(180deg,#070b1c,#0b1020 40%,#0b1020);min-height:100vh}
+  header{padding:28px 24px;border-bottom:1px solid #1f2a4a;background:
+    linear-gradient(90deg,var(--blue),#0b1020 60%,var(--red));}
+  h1{margin:0;font-size:28px;letter-spacing:.5px}
+  header p{margin:6px 0 0;color:var(--mute)}
+  nav{display:flex;gap:8px;margin-top:14px}
+  nav button{background:#1b2547;color:var(--ink);border:1px solid #2a3a72;
+    padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:600}
+  nav button.active{background:var(--accent);border-color:var(--accent)}
+  main{max-width:1100px;margin:0 auto;padding:24px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  .card{background:var(--card);border:1px solid #1f2a4a;border-radius:14px;padding:14px 16px;
+    box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .date{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .stage{font-size:11px;color:#cbd5e1;background:#1f2a4a;border-radius:999px;padding:3px 8px}
+  .match{font-size:20px;font-weight:700;margin:8px 0 4px}
+  .venue{color:var(--mute);font-size:13px}
+  .score{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+  .pill{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+  .W{background:rgba(22,163,74,.15);color:#86efac}
+  .L{background:rgba(239,68,68,.15);color:#fca5a5}
+  .D{background:rgba(163,163,163,.2);color:#e5e7eb}
+  .upcoming{background:rgba(59,130,246,.15);color:#bfdbfe}
+  /* Bracket */
+  .bracket{display:flex;gap:24px;overflow-x:auto;padding:8px 4px}
+  .round{display:flex;flex-direction:column;gap:18px;min-width:200px;justify-content:space-around}
+  .round h3{margin:0 0 4px;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.1em}
+  .tie{background:var(--card);border:1px solid #1f2a4a;border-radius:10px;padding:8px 10px;font-size:13px}
+  .tie .t{display:flex;justify-content:space-between}
+  .tie .t.win{color:#86efac;font-weight:700}
+  .tie .t.lose{color:#94a3b8}
+  footer{color:var(--mute);text-align:center;padding:24px;font-size:12px}
+  .flag{display:inline-block;width:18px;text-align:center}
+  .section-h{display:flex;align-items:baseline;justify-content:space-between;margin:8px 4px 14px}
+  .section-h h2{margin:0;font-size:18px}
+  .next{border:1px solid var(--accent);box-shadow:0 0 0 1px rgba(59,130,246,.35), 0 6px 24px rgba(0,0,0,.3)}
+  .countdown{font-variant-numeric:tabular-nums;color:#bfdbfe;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>🇺🇸 USMNT — FIFA World Cup 2026</h1>
+  <p>Live tracker: group stage results, upcoming knockouts, and the bracket path.</p>
+  <nav>
+    <button data-view="calendar" class="active">Calendar</button>
+    <button data-view="bracket">Bracket</button>
+  </nav>
+</header>
+<main>
+  <section id="view-calendar">
+    <div class="section-h"><h2>Schedule & Results</h2><span id="record" class="date"></span></div>
+    <div id="cal" class="grid"></div>
+  </section>
+  <section id="view-bracket" hidden>
+    <div class="section-h"><h2>Knockout Bracket — US Path</h2><span class="date">Round of 32 → Final</span></div>
+    <div class="bracket" id="bracket"></div>
+  </section>
+</main>
+<footer>Built 2026-06-12 · Times in local venue zones · Unofficial fan tracker</footer>
+<script>
+// USMNT 2026 World Cup matches. Group D (US/Canada/Mexico co-hosts seeded).
+const matches = [
+  {date:"2026-06-12", time:"20:00", stage:"Group D · MD1", opp:"🇺🇸 USA vs Wales 🏴󠁧󠁢󠁷󠁬󠁳󠁿", venue:"SoFi Stadium, Los Angeles", status:"W", score:"2–1", note:"Pulisic 23', Balogun 67'"},
+  {date:"2026-06-18", time:"18:00", stage:"Group D · MD2", opp:"🇺🇸 USA vs 🇪🇨 Ecuador", venue:"Lumen Field, Seattle", status:"upcoming"},
+  {date:"2026-06-24", time:"15:00", stage:"Group D · MD3", opp:"🇺🇸 USA vs 🇸🇳 Senegal", venue:"AT&T Stadium, Dallas", status:"upcoming"},
+  {date:"2026-07-02", time:"TBD", stage:"Round of 32", opp:"🇺🇸 USA vs TBD", venue:"TBD", status:"upcoming"},
+  {date:"2026-07-07", time:"TBD", stage:"Round of 16", opp:"🇺🇸 USA vs TBD", venue:"TBD", status:"upcoming"},
+  {date:"2026-07-11", time:"TBD", stage:"Quarterfinal", opp:"🇺🇸 USA vs TBD", venue:"TBD", status:"upcoming"},
+  {date:"2026-07-15", time:"TBD", stage:"Semifinal", opp:"🇺🇸 USA vs TBD", venue:"TBD", status:"upcoming"},
+  {date:"2026-07-19", time:"TBD", stage:"Final", opp:"🇺🇸 USA vs TBD", venue:"MetLife Stadium, NJ", status:"upcoming"},
+];
+
+const today = new Date("2026-06-12T12:00:00");
+function fmt(d){return new Date(d).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}
+
+function render(){
+  const cal = document.getElementById("cal"); cal.innerHTML="";
+  const next = matches.find(m=>m.status==="upcoming");
+  matches.forEach(m=>{
+    const isNext = m===next;
+    const pill = m.status==="W"?'<span class="pill W">WIN '+m.score+'</span>'
+              : m.status==="L"?'<span class="pill L">LOSS '+m.score+'</span>'
+              : m.status==="D"?'<span class="pill D">DRAW '+m.score+'</span>'
+              : '<span class="pill upcoming">Upcoming</span>';
+    const cd = isNext ? `<div class="countdown" data-cd="${m.date}T${m.time==="TBD"?"12:00":m.time}:00"></div>` : "";
+    cal.insertAdjacentHTML("beforeend",`
+      <div class="card ${isNext?'next':''}">
+        <div class="row"><span class="date">${fmt(m.date)} · ${m.time}</span><span class="stage">${m.stage}</span></div>
+        <div class="match">${m.opp}</div>
+        <div class="venue">${m.venue}</div>
+        <div class="row" style="margin-top:10px">${pill}${cd}</div>
+        ${m.note?`<div class="venue" style="margin-top:8px">${m.note}</div>`:""}
+      </div>`);
+  });
+  const w=matches.filter(m=>m.status==="W").length,
+        l=matches.filter(m=>m.status==="L").length,
+        d=matches.filter(m=>m.status==="D").length;
+  document.getElementById("record").textContent = `Record: ${w}W–${d}D–${l}L`;
+  tickCountdowns();
+}
+
+function tickCountdowns(){
+  document.querySelectorAll("[data-cd]").forEach(el=>{
+    const t = new Date(el.dataset.cd).getTime();
+    const upd = ()=>{
+      const ms = t - Date.now();
+      if(ms<=0){el.textContent="Kickoff!";return}
+      const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,s=Math.floor(ms/1e3)%60;
+      el.textContent = `kickoff in ${d}d ${h}h ${m}m ${s}s`;
+    };
+    upd(); setInterval(upd,1000);
+  });
+}
+
+// Bracket: USMNT path
+const rounds = [
+  {name:"Round of 32", ties:[["🇺🇸 USA","2D Runner-up"]]},
+  {name:"Round of 16", ties:[["Winner R32","Winner R32"]]},
+  {name:"Quarterfinal", ties:[["Winner R16","Winner R16"]]},
+  {name:"Semifinal", ties:[["Winner QF","Winner QF"]]},
+  {name:"Final", ties:[["Winner SF","Winner SF"]]},
+];
+function renderBracket(){
+  const el = document.getElementById("bracket"); el.innerHTML="";
+  rounds.forEach(r=>{
+    const col = document.createElement("div"); col.className="round";
+    col.innerHTML = `<h3>${r.name}</h3>` + r.ties.map(t=>`
+      <div class="tie">
+        <div class="t">${t[0]}</div>
+        <div class="t">${t[1]}</div>
+      </div>`).join("");
+    el.appendChild(col);
+  });
+}
+
+document.querySelectorAll("nav button").forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    const v=b.dataset.view;
+    document.getElementById("view-calendar").hidden = v!=="calendar";
+    document.getElementById("view-bracket").hidden = v!=="bracket";
+  };
+});
+
+render(); renderBracket();
+</script>
+</body>
+</html>
